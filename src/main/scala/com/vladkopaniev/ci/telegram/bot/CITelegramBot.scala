@@ -47,6 +47,7 @@ import cats.Show
 import com.bot4s.telegram.models.ReplyMarkup
 import com.bot4s.telegram.methods.ParseMode
 import com.vladkopaniev.ci.telegram.config.BotAppConfig
+import eu.timepit.refined.auto._
 
 class CITelegramBot[F[_]: Sync, N <: HasSubscriberId: TelegramMarkup] private (
   botAppConfig: BotAppConfig,
@@ -54,7 +55,7 @@ class CITelegramBot[F[_]: Sync, N <: HasSubscriberId: TelegramMarkup] private (
   backend: SttpBackend[F, Any],
   logger: Logger[F]
 )(using MCT: MonadCancelThrow[F])
-  extends TelegramBot[F](botAppConfig.telegramApiConfig.token.toString, backend),
+  extends TelegramBot[F](botAppConfig.telegramApiConfig.token, backend),
     Commands[F],
     Polling[F],
     Callbacks[F],
