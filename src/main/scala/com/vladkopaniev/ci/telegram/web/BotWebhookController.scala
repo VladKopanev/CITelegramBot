@@ -19,24 +19,23 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import java.util.UUID
 
 class BotWebhookController[F[_]: Concurrent] private (
-  bin: BuildInfoNotifyer[F, BuildResultNotification],
+  notifier: BuildInfoNotifyer[F, BuildResultNotification],
   logger: Logger[F]
 ) extends Http4sDsl[F]:
 
   def ciWebHookRoute: HttpRoutes[F] =
     import org.http4s.circe.CirceEntityDecoder._
     HttpRoutes.of[F] {
-      case req @ POST -> Root / "travis" / "build" / "notify" =>
+      case req @ POST -> Root / "travis" / "build" / "notify" / "subscriber" / UUIDVar(subscriberId) =>
         for
           form <- req.as[UrlForm]
-          maybeSubscriberId = req.params.get("subscriberId").map(subId => UUID.fromString(subId))
           maybePayload = form.values.get("payload").flatMap(_.headOption)
-          _ <- maybePayload.zip(maybeSubscriberId).fold(
-            logger.warn("Payload or subscriberId was absscent in callback request!")
-          ) { (payload, subscriberId) =>
+          _ <- maybePayload.fold(
+            logger.warn("Payload was absscent in callback request!")
+          ) { payload =>
             Concurrent[F]
               .fromEither(decode[TravisCIBuildResultInfo](payload))
-              .flatMap(bri => bin.notify(bri.asNotification(subscriberId)))
+              .flatMap(webhookData => notifier.notify(webhookData.asNotification(subscriberId)))
           }
           result <- Ok("ok")
         yield result
