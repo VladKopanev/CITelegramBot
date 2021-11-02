@@ -129,9 +129,12 @@ class CITelegramBot[F[_]: Sync, N <: HasSubscriberId: TelegramMarkup] private (
       else MCT.unit
     }
 
+
+  import unindent._
+
   private val webhookConfig = botAppConfig.webhookConfig
   private val CiToolTypesAndCallbackData: Map[String, String] = Map(
-    "travisci" -> s"""Use this url in your travisci webhook notification config: 
+    "travisci" -> i"""Use this url in your travisci webhook notification config: 
       '${webhookConfig.scheme}://${webhookConfig.hostBaseUrl}/travis/build/notify/subscriber/%s'"""
   )
 
