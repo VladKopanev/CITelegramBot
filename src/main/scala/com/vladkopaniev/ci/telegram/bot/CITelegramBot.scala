@@ -129,7 +129,6 @@ class CITelegramBot[F[_]: Sync, N <: HasSubscriberId: TelegramMarkup] private (
       else MCT.unit
     }
 
-
   import unindent._
 
   private val webhookConfig = botAppConfig.webhookConfig
